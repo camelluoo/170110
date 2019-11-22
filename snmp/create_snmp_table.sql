@@ -1,0 +1,69 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+DROP TABLE IF EXISTS `toptea`.`SNMP_TOKEN`;
+CREATE TABLE if not exists `toptea`.`SNMP_TOKEN` (
+	`ID` int(12)  AUTO_INCREMENT  NOT NULL  COMMENT '编码 AUTO_INCREMENT' ,	
+	`OID` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT 'MIB编码 ' ,	
+	`NAME` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '名称 ' ,	
+	`ALIAS_NAME` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '别名 ' ,	
+	`MODE` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'GET' COMMENT '模式 ' ,	
+	`TYPE` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT '系统参数' COMMENT '类别 ' ,	
+	`TOKEN_GROUP` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'g1' COMMENT '分组 ' 	
+	,PRIMARY KEY (ID) USING BTREE
+ 	,INDEX `IDX_OID` (`OID`, `TOKEN_GROUP`  )
+ 	,INDEX `IDX_TOKEN_TYPE` (`TYPE`  )
+) COMMENT='指标表' ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+
+DROP TABLE IF EXISTS `toptea`.`SNMP_SERVER`;
+CREATE TABLE if not exists `toptea`.`SNMP_SERVER` (
+	`IP` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT 'IP地址 ' ,	
+	`COMMUNITY` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '社区名 ' ,	
+	`SERVER_VERSION` int(2)   NOT NULL  DEFAULT 1 COMMENT 'SNMP版本 ' ,	
+	`PORT` int(5)   NOT NULL  DEFAULT 161 COMMENT '端口 ' ,	
+	`SERVER_GROUP` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'g1' COMMENT '分组 ' ,	
+	`STATE` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'OK' COMMENT '上次扫描状态 上次指定TOKEN扫描状态' 	
+	,PRIMARY KEY (IP) USING BTREE
+ 	,INDEX `IDX_GROUP` (`SERVER_GROUP`  )
+) COMMENT='采集主机表' ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+
+DROP TABLE IF EXISTS `toptea`.`SNMP_BATCH_RESULT`;
+CREATE TABLE if not exists `toptea`.`SNMP_BATCH_RESULT` (
+	`ID` int(12)  AUTO_INCREMENT  NOT NULL  COMMENT '主键ID AUTO_INCREMENT' ,	
+	`BATCH_ID` int(12)   NOT NULL  COMMENT '批次号 ' ,	
+	`IP` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '采集IP ' ,	
+	`STATE` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'OK' COMMENT '上次扫描状态 上次指定TOKEN扫描状态' ,	
+	`BEGIN_TIME` timestamp(0)   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '开始时间 ' ,	
+	`END_TIME` timestamp(0)   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '结束时间 ' ,	
+	`SERVER_GROUP` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'g1' COMMENT '分组 ' ,	
+	`SCORE` int(12)   NOT NULL  COMMENT '评分 ' ,	
+	`EXT_ATTR_A` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性A ' ,	
+	`EXT_ATTR_B` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性B ' ,	
+	`EXT_ATTR_C` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性C ' ,	
+	`EXT_ATTR_D` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性D ' ,	
+	`EXT_ATTR_E` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性E ' 	
+	,PRIMARY KEY (ID) USING BTREE
+ 	,INDEX `IDX_RESULT_IP` (`BATCH_ID`, `IP`  )
+ 	,INDEX `IDX_GROUP` (`SERVER_GROUP`  )
+) COMMENT='采集批次表' ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+
+DROP TABLE IF EXISTS `toptea`.`SNMP_RESULT`;
+CREATE TABLE if not exists `toptea`.`SNMP_RESULT` (
+	`ID` int(12)  AUTO_INCREMENT  NOT NULL  COMMENT '主键ID AUTO_INCREMENT' ,	
+	`BATCH_ID` int(12)   NOT NULL  COMMENT '批次号 ' ,	
+	`IP` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '采集IP ' ,	
+	`OID` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '编码 ' ,	
+	`NAME` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '名称 ' ,	
+	`ALIAS_NAME` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '别名 ' ,	
+	`CONTENT_ID` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '结果OID编码 ' ,	
+	`TYPE` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '类别 ' ,	
+	`VALUE` varchar(2000) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '采集结果 ' ,	
+	`COL_TIME` timestamp(0)   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '采集时间 ' 	
+	,PRIMARY KEY (ID) USING BTREE
+ 	,INDEX `IDX_RESULT_IP` (`BATCH_ID`, `IP`  )
+) COMMENT='采集结果明细表' ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+

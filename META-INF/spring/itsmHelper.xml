@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:elasticsearch="http://www.springframework.org/schema/data/elasticsearch"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd 
+            http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/data/elasticsearch
+		http://www.springframework.org/schema/data/elasticsearch/spring-elasticsearch-1.0.xsd
+        http://code.alibabatech.com/schema/dubbo 
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<context:component-scan base-package="com.ai.toptea" />
+	<bean id="contextUtil" class="com.ai.toptea.itsm_helper.util.ContextUtil" />
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath*:META-INF/spring/itsmHelper.properties</value>
+				<value>classpath*:META-INF/spring/snmp.properties</value>
+			</list>
+		</property>
+		<property name="fileEncoding">
+			<value>UTF-8</value>
+		</property>
+	</bean>
+	<!-- <bean id="propertyListener" class="com.ai.toptea.basic.spring.PropertiesUpdateListener"> 
+		<property name="enableRemoteProperty" value="false" /> <property name="ignorePlaceholders" 
+		value="" /> </bean> -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass">
+			<value>${jdbc.driverClassName}</value>
+		</property>
+		<property name="jdbcUrl">
+			<value>${jdbc.url}</value>
+		</property>
+		<property name="user">
+			<value>${jdbc.username}</value>
+		</property>
+		<property name="password">
+			<value>${jdbc.password}</value>
+		</property>
+		<!-- <property name="password"> <value>${jdbc.password}</value> </property> -->
+		<property name="initialPoolSize">
+			<value type="long">${jdbc.initialPoolSize}</value>
+		</property>
+		<property name="minPoolSize">
+			<value type="long">5</value>
+		</property>
+		<property name="maxPoolSize">
+			<value type="long">100</value>
+		</property>
+		<property name="maxIdleTime">
+			<value type="long">30</value>
+		</property>
+		<property name="acquireIncrement">
+			<value type="long">5</value>
+		</property>
+		<property name="maxStatements">
+			<value type="long">0</value>
+		</property>
+		<property name="numHelperThreads">
+			<value type="long">10</value>
+		</property>
+
+		<!--当连接超过3600秒（一个小时）时，强制收回（不论此时连接在用还是空闲），同时输出日志 -->
+		<property name="debugUnreturnedConnectionStackTraces">
+			<value>true</value>
+		</property>
+		<property name="unreturnedConnectionTimeout">
+			<value>3600</value>
+		</property>
+	</bean>
+
+
+	<!-- 定义事务管理器（声明式的事务） -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!--oracle数据库使用OracleLobHandler,其他使用DefaultLobHandler -->
+	<bean id="defaultLobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler"
+		lazy-init="true">
+
+		<!--<property name="nativeJdbcExtractor"> <bean class="org.springframework.jdbc.support.nativejdbc.C3P0NativeJdbcExtractor" 
+			/> </property> -->
+	</bean>
+
+	<bean id="transactionTemplate"
+		class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="transactionManager" ref="transactionManager" />
+	</bean>
+
+	<bean id="dbUtil" class="com.ai.toptea.itsm_helper.db.DBUtil">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+		<property name="transactionTemplate" ref="transactionTemplate" />
+		<property name="lobHandler" ref="defaultLobHandler" />
+	</bean>
+
+
+	<bean id="propUtil" class="com.ai.toptea.itsm_helper.prop.PropUtil">
+	</bean>
+
+
+	<bean id="sqlExec" class="org.apache.tools.ant.taskdefs.SQLExec" scope="prototype">
+		<property name="driver">
+			<value>${jdbc.driverClassName}</value>
+		</property>
+		<property name="url">
+			<value>${jdbc.ddl_url}</value>
+		</property>
+		<property name="userid">
+			<value>${jdbc.username}</value>
+		</property>
+		<property name="password">
+			<value>${jdbc.password}</value>
+		</property>
+	</bean>
+
+
+	<bean id="threadUtil" class="com.ai.toptea.itsm_helper.util.ThreadUtil"
+		scope="prototype">
+		<constructor-arg name="poolSize" value="${thread.pool.poolSize}" />
+		<constructor-arg name="maximumPoolSize" value="${thread.pool.maximumPoolSize}" />
+		<constructor-arg name="keepAliveTime" value="${thread.pool.keepAliveTime}" />
+		<constructor-arg name="queueSize" value="${thread.pool.queueSize}" />
+	</bean>
+
+	<bean id="snmpProp" class="com.ai.toptea.itsm_helper.prop.OrderedProperties"
+		init-method="init">
+
+	</bean>
+
+	<bean id="velocityUtil" class="com.ai.toptea.itsm_helper.util.VelocityUtil">
+	</bean>
+
+</beans>

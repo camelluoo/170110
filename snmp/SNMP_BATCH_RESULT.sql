@@ -1,0 +1,18 @@
+CREATE TABLE if not exists `toptea`.`SNMP_BATCH_RESULT_XXXX` (
+	`ID` int(12)  AUTO_INCREMENT  NOT NULL  COMMENT '主键ID AUTO_INCREMENT' ,	
+	`BATCH_ID` int(12)   NOT NULL  COMMENT '批次号 ' ,	
+	`IP` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  COMMENT '采集IP ' ,	
+	`STATE` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'OK' COMMENT '上次扫描状态 上次指定TOKEN扫描状态' ,	
+	`BEGIN_TIME` timestamp(0)   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '开始时间 ' ,	
+	`END_TIME` timestamp(0)   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '结束时间 ' ,	
+	`SERVER_GROUP` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL  DEFAULT 'g1' COMMENT '分组 ' ,	
+	`SCORE` int(12)   NOT NULL  COMMENT '评分 ' ,	
+	`EXT_ATTR_A` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性A ' ,	
+	`EXT_ATTR_B` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性B ' ,	
+	`EXT_ATTR_C` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性C ' ,	
+	`EXT_ATTR_D` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性D ' ,	
+	`EXT_ATTR_E` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL   COMMENT '扩展属性E ' 	
+	,PRIMARY KEY (ID) USING BTREE
+ 	,INDEX `IDX_RESULT_IP` (`BATCH_ID`, `IP`  )
+ 	,INDEX `IDX_GROUP` (`SERVER_GROUP`  )
+) COMMENT='采集批次表' ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
